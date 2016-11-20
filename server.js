@@ -51,7 +51,80 @@ app.get('/', function(req, res) {
 });
 
 // API ROUTES -------------------
-// we'll get to these in a second
+var apiRoutes = express.Router();
+
+apiRoutes.post("/auth", function(req, res){
+   User.findOne({name: req.body.name}, function(err, user){
+    
+    if(err){
+      console.log("error");
+    } if (!user){
+      res.json({success:false, message: "auth failed, usuario no encontrado"})
+    } else if(user){
+
+
+      if(user.password != req.body.password){
+        res.json({success:false, message:"contraseña incorrecta"})
+      } else {
+
+
+         var token = jwt.sign(user, app.get("superSecret"), {
+              expiresIn : 60*60*24
+         });
+
+         res.json({success:true, message: "logeado correctamente", token: token});
+      }
+    }
+
+
+   });
+
+});
+
+//Check token
+
+apiRoutes.use(function(req,res,next){
+   
+var token = req.body.token || req.query.token || req.headers["x-access-token"];
+
+if(token){
+
+  jwt.verify(token, app.get("superSecret"), function(err, decoded){
+           if(err){
+             res.json({success:false, message:"error"});
+           } else {
+             req.decoded = decoded;
+             next();
+           }
+  });
+
+} else {
+
+  return res.status(403).send({success:false, message:"token falso"});
+}
+
+});
+
+apiRoutes.get("/",function(req,res){
+
+ res.json({message : "Bienvenido al auth de mi api"});
+});
+
+
+apiRoutes.get("/users", function(req, res){
+  
+   User.find({}, function(err, users){
+     if(err){
+       console.log("errorr")
+     } else {
+       res.json(users);
+     }
+   });
+
+});
+
+app.use("/api", apiRoutes);
+
 
 // =======================
 // start the server ======
