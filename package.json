@@ -2,10 +2,12 @@
   "name": "node-token-jwt",
   "main": "server.js",
   "dependencies": {
+    "bcrypt": "^1.0.0",
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
     "jsonwebtoken": "^7.1.9",
     "mongoose": "^4.6.8",
+    "mongoose-role": "^2.0.0",
     "morgan": "^1.7.0"
   }
 }
