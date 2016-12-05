@@ -56,6 +56,8 @@ app.post('/setup', function(req, res) {
     res.json({ success: true });
   });
 });
+
+
 // =======================
 // basic route
 app.get('/', function(req, res) {
@@ -75,17 +77,21 @@ apiRoutes.post("/auth", function(req, res){
     } else if(user){
 
 
-      if(user.password != req.body.password){
-        res.json({success:false, message:"contraseña incorrecta"})
-      } else {
-
-
-         var token = jwt.sign(user, app.get("superSecret"), {
+          user.comparePassword(req.body.password, function(err, isMatch) {
+            if (isMatch && isMatch == true) {
+            var token = jwt.sign(user, app.get("superSecret"), {
               expiresIn : 60*60*24
-         });
 
-         res.json({success:true, message: "logeado correctamente", token: token});
-      }
+              });
+
+            res.json({success:true, message: "logeado correctamente", token: token});
+
+           } else { 
+            res.json({success:false, message: "contraseña incorrecta"});
+          }
+            
+        });    
+      
     }
 
 
@@ -123,7 +129,7 @@ apiRoutes.get("/",function(req,res){
 });
 
 
-apiRoutes.get("/users", function(req, res){
+apiRoutes.get("/users",function(req, res){
   
    User.find({}, function(err, users){
      if(err){
@@ -134,6 +140,7 @@ apiRoutes.get("/users", function(req, res){
    });
 
 });
+
 
 app.use("/api", apiRoutes);
 
